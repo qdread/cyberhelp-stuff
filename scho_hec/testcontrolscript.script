@@ -1,0 +1,5 @@
+// HEC-HMS control script, modified from script on page 18 of user's manual version 4.3
+from hms.model.JythonHms import * 
+OpenProject("...", "Z:\\spatialdata\Brazil\HEC-HMS\...") // Z: should be mapped to /nfs/scho-data/. Insert the name of the script and the full path to the model directory in place of the ...
+Compute("Run 1") // replace this with run name
+Exit(1)
