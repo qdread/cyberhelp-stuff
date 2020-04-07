@@ -9,3 +9,7 @@ nodestatus=$(sinfo -p sesync,sesyncshared --Format="nodeaiot" |
 	
 # Append output to a file, with date.
 echo $(date +%F),$users,$nodestatus >> /nfs/public-data/cyberhelp/usage_logs/active_users.csv
+
+# Run R script to update the user graph.
+Rscript --vanilla /nfs/public-data/cyberhelp/usage_logs/plotlog.R
+
