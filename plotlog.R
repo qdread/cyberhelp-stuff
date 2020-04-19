@@ -12,10 +12,11 @@ p <- dat %>%
   geom_point(aes(color = weekend), size = 3) +
   scale_color_manual(values = c('black', 'gray75')) +
   facet_wrap(~ name, nrow = 2, labeller = labeller(name = c(rstudio_users = 'Number of active RStudio sessions',
-                                                            slurm_active = 'Number of active Slurm nodes'))) +
+                                                            slurm_active = 'Number of active Slurm nodes')),
+			scales = 'free_y') +
   theme_bw() +
   theme(strip.background = element_blank(), 
-        legend.position = c(.1, .65),
+        legend.position = c(.1, .35),
         legend.title = element_blank(),
         legend.key = element_blank(),
         legend.background = element_blank(),
