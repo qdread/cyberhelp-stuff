@@ -1,0 +1,10 @@
+---
+title: "Some stuff"
+author: "Quentin D. Read"
+date: "5/14/2020"
+output: pdf_document
+---
+
+# Introduction
+
+Sit aliquet penatibus cras nibh luctus tortor diam justo tellus eget augue eleifend. Tortor nisl curabitur donec mattis class. Potenti sagittis inceptos auctor mauris eget purus. Praesent elementum laoreet magnis varius sed taciti curae in. Quis nibh nunc faucibus diam ligula euismod enim lobortis placerat montes conubia ad lacus molestie enim. Sit accumsan tempus bibendum cum vivamus porta nunc aptent primis senectus. Justo morbi nostra congue et facilisi habitant sollicitudin sociis pellentesque ut pulvinar. Mattis sociosqu pellentesque non habitasse vel dui. Interdum sollicitudin pharetra facilisi bibendum conubia dapibus nam. Nam phasellus fermentum pharetra vel himenaeos gravida netus feugiat nibh fames scelerisque interdum natoque facilisi luctus aliquam dignissim himenaeos vehicula est.

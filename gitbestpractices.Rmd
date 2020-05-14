@@ -1,0 +1,96 @@
+---
+title: "Git collaboration best practices"
+author: "Quentin D. Read"
+date: "5/13/2020"
+output: beamer_presentation
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Why use it? or better, why not use it?
+
+- Everyone uses version control -- this is a way to formalize it 
+
+![Bryan Fig 1](gitpresentation/bryanfig1.PNG){height: 75%}
+
+## Why use it? or better, why not use it?
+
+- Project management
+- It is your project's web presence, and part of your personal web presence; in some fields it is almost an expectation
+- Part of a suite of open science tools 
+
+## Arguments against
+
+- It does take some buy-in from everyone participating
+- (perceived to have) a steep learning curve
+
+## Stories?
+
+- Does anyone have any good stories or horror stories?
+
+## Use cases
+
+During
+
+- use it solo to organize your work
+- multiple team members can contribute to a repository simultaneously
+
+After
+
+- publish a repository to the web (e.g. to make results from a publication open and reproducible)
+  + Note: this may require ongoing maintenance!
+
+## How it works
+
+- what is git 
+- github and gitlab - central repository to keep all collaborators synchronized
+- definition of master
+- definition of fork and clone
+- definition of push and pull
+
+## Git in RStudio
+
+- Creating a new project under version control
+- Making changes, committing, and pushing
+- Pulling
+- Branches (master vs other branches)
+
+## R package workflow 
+
+- Use this as a way to demonstrate how you would maintain a published product, and/or contribute to other people's projects
+
+- introduce pull requests and issues (can be used internally or externally), issues can be used to track tasks/for project mgmt.
+- there are other options for project management
+- another example is submitting assignments in a class as issues to a repo that point to a commit
+
+## Example: Q's personal GitHub
+
+- <https://github.com/qdread>
+- DISCLAIMER: this does not entirely embody best practices!!!
+
+## Example: SESYNC Cyberinfrastructure GitHub
+
+- <https://github.com/sesync-ci/>
+  + [Project containing all lessons in curriculum](https://github.com/orgs/SESYNC-ci/projects/2) -- good demonstration of project management
+  + [rslurm package](https://github.com/SESYNC-ci/rslurm) -- note the issues and pull requests
+
+## Outside resources
+
+- [Using zenodo to get a DOI for your published git repository](https://guides.github.com/activities/citable-code/)
+- [Hadley Wickham's book on packages](http://r-pkgs.had.co.nz/)
+- [Excuse me, do you have a moment to talk about version control?](https://peerj.com/preprints/3159/) Excellent paper by Jenny Bryan, which I shamelessly copied from for this presentation
+
+
+## SESYNC resources
+
+- [basic git lesson](http://cyberhelp.sesync.org/basic-git-lesson/)
+- [document with resources on learning GitHub Pages](https://github.com/SESYNC-ci/sesync-ci.github.io/blob/master/blog/_drafts/github-pages-resources.md) -- this is still a draft in progress!
+
+
+
+
+
+

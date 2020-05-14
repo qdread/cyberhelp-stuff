@@ -1,0 +1,23 @@
+# Notes for discussion: 
+
+- Why use it?
+- Question: why not use it? Not related to quantitative vs qualitative. It can be used for writing (if you write all your manuscripts in markdown, lol), version control of your spreadsheets where you record textual sources, visualizations, qualitative analysis
+- If historians are inherently skeptics, it should be all the more enticement to use version control because it makes your claims more transparent so that others can see the information underlying them and how you extracted it from sources
+- digital humanities projects should be based on version control as well
+- It does take some buy-in from everyone participating
+- Does anyone have any good stories or horror stories?
+
+- what is git (use by yourself)
+- github and gitlab - central repository to keep all collaborators synchronized
+- definition of master
+- definition of fork and clone
+- definition of push and pull
+
+- zenodo publication https://guides.github.com/activities/citable-code/
+- Hadley's book on packages
+- Jenny Bryan's thing on version control
+
+- R package workflow 
+- unit testing (testthat package)
+
+- Use rslurm package as example
