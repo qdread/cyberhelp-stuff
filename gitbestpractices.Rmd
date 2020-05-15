@@ -1,8 +1,10 @@
 ---
 title: "Git collaboration best practices"
 author: "Quentin D. Read"
-date: "5/13/2020"
-output: beamer_presentation
+date: "5/15/2020"
+output: 
+  beamer_presentation:
+    fig_caption: FALSE
 urlcolor: blue
 ---
 
@@ -10,16 +12,24 @@ urlcolor: blue
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+## Goals for today
+
+- Discuss the rationale behind using version control and a few possible use cases
+- Share experiences, good and bad
+- Explore using Git integration in RStudio
+- Show some examples from Quentin's work and from the SESYNC-CI GitHub
+
 ## Why use it? or better, why not use it?
 
 - Everyone uses version control -- this is a way to formalize it 
 
-![Bryan Fig 1](gitpresentation/bryanfig1.PNG){height: 75%}
+![Bryan Fig 1](gitpresentation/bryanfig1.PNG){height=75%}
 
 ## Why use it? or better, why not use it?
 
 - Project management
-- It is your project's web presence, and part of your personal web presence; in some fields it is almost an expectation
+- It is your project's web presence, and part of your personal web presence
+- In some fields it is almost an expectation that you will have an active GitHub site
 - Part of a suite of open science tools 
 
 ## Arguments against
@@ -40,42 +50,69 @@ During
 
 After
 
-- publish a repository to the web (e.g. to make results from a publication open and reproducible)
-  + Note: this may require ongoing maintenance!
+- publish a repository to the web (for open/reproducible science)
+  + *Note*: this may require ongoing maintenance!
 
 ## How it works
 
-- what is git 
-- github and gitlab - central repository to keep all collaborators synchronized
-- definition of master
-- definition of fork and clone
-- definition of push and pull
+![version control figure](gitpresentation/bryanfig2.PNG){height=80%}
 
-## Git in RStudio
+- git vs GitHub vs GitLab?
+- What's a repo(sitory)?
 
-- Creating a new project under version control
-- Making changes, committing, and pushing
-- Pulling
-- Branches (master vs other branches)
+## Pulling and pushing
 
-## R package workflow 
+![pull and push figure](gitpresentation/bryanfig5.PNG)
 
-- Use this as a way to demonstrate how you would maintain a published product, and/or contribute to other people's projects
+## Forking and cloning
 
-- introduce pull requests and issues (can be used internally or externally), issues can be used to track tasks/for project mgmt.
-- there are other options for project management
-- another example is submitting assignments in a class as issues to a repo that point to a commit
+![fork and clone figure](gitpresentation/forkandclonegithub.PNG)
+
+## Git in RStudio: creating a project
+
+- RStudio uses "projects" to organize your work
+  + projects correspond to repos
+
+![new project from version control](gitpresentation/newprojfromversioncontrol.PNG){height=75%}
+
+## Git in RStudio: pull before new work!
+
+![git menu showing pull branches](gitpresentation/pullmenu.PNG)
+
+## Git in RStudio: committing changes
+
+![commit dialog box](gitpresentation/commitdialogbox.PNG)
+
+## Git in RStudio: branches
+
+- Creating new branches must be done through the terminal or on the GitHub website
+
+![terminal window showing creation of branch](gitpresentation/branchterminal.PNG)
 
 ## Example: Q's personal GitHub
 
 - <https://github.com/qdread>
-- DISCLAIMER: this does not entirely embody best practices!!!
+  + **DISCLAIMER**: this does not entirely embody best practices!!!
+  
+![](gitpresentation/embarrassedhomer.jpg){height=50%}
 
 ## Example: SESYNC Cyberinfrastructure GitHub
 
 - <https://github.com/sesync-ci/>
   + [Project containing all lessons in curriculum](https://github.com/orgs/SESYNC-ci/projects/2) -- good demonstration of project management
-  + [rslurm package](https://github.com/SESYNC-ci/rslurm) -- note the issues and pull requests
+  + [rslurm package](https://github.com/SESYNC-ci/rslurm) -- note the issues and pull requests 
+  
+## (Semi)-advanced topic: issues and pull requests
+
+- Can be used either internally or externally
+  + Internally to track tasks for project management
+  + Externally for community members to contribute to your project
+
+## SESYNC resources
+
+- [basic git lesson](http://cyberhelp.sesync.org/basic-git-lesson/)
+- [all quick start, FAQ, and help pages tagged with git](https://cyberhelp.sesync.org/tags.html?with=git)
+- [document with resources on learning GitHub Pages](https://github.com/SESYNC-ci/sesync-ci.github.io/blob/master/blog/_drafts/github-pages-resources.md) -- this is still a draft in progress!
 
 ## Outside resources
 
@@ -84,10 +121,6 @@ After
 - [Excuse me, do you have a moment to talk about version control?](https://peerj.com/preprints/3159/) Excellent paper by Jenny Bryan, which I shamelessly copied from for this presentation
 
 
-## SESYNC resources
-
-- [basic git lesson](http://cyberhelp.sesync.org/basic-git-lesson/)
-- [document with resources on learning GitHub Pages](https://github.com/SESYNC-ci/sesync-ci.github.io/blob/master/blog/_drafts/github-pages-resources.md) -- this is still a draft in progress!
 
 
 
