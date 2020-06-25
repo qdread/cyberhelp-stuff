@@ -1,3 +1,7 @@
+#!/bin/bash
+
+cd /nfs/agbirds-data/Quentin_test_output
+
 # Convert all 255 nodata values to 0
 for tif in *_Soybeans_week_20.tif
 do 

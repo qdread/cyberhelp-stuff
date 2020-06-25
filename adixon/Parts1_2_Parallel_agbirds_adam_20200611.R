@@ -19,7 +19,7 @@ run_parallel<-function(state_order){
   #crops to get
   crops_list<-c("Corn", "Soybeans","Winter Wheat")
   crops_id<-c(1,5,24) #24, ##MAKE sure and get the ID right, get from cdl attribute table
-  cdl<-raster("/nfs/agbirds-data/April2020/April2020/data/2019_30m_cdls.img")
+  cdl<-raster("/nfs/agbirds-data/April2020/April2020/data/2019_30m_cdls(1)/2019_30m_cdls.img") # QDR edited 13 June: correct file path
   
   #use attribute table to look up crop ID in cdl
   states<-shapefile("/nfs/agbirds-data/April2020/April2020/data/cb_2016_us_state_500k.shp") %>%

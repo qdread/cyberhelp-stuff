@@ -16,13 +16,13 @@ slurmmailsent=$(grep -E "slurm.*`date +"%Y.%m.%d"`" $logfile)
 
 # If percentage use is over 90% send myself an email if none have been sent today
 if [ $pct -ge "90" ] && [ -z "$researchmailsent" ]; then
-	mail -s "Research Homedirs is ${pct}% full!!! Do something, Q!" qread@sesync.org < /dev/null
+	mail -s "Research Homedirs is ${pct}% full!!! Do something, Q!" qread@umd.edu < /dev/null
 	echo "research homedirs warning sent on $(date +%Y.%m.%d)" >> $logfile
 fi
 	
 # If at least 6 of the slurm nodes are down or drained send myself an email
 if [ ${nbadnodes[2]} -ge "6" ] && [ -z "$slurmmailsent" ]; then
-	mail -s "${nbadnodes[2]} of the slurm nodes are in a bad state!!! Do something, Q!" qread@sesync.org < /dev/null
+	mail -s "${nbadnodes[2]} of the slurm nodes are in a bad state!!! Do something, Q!" qread@umd.edu < /dev/null
 	echo "slurm nodes warning sent on $(date +%Y.%m.%d)" >> $logfile
 fi
 
