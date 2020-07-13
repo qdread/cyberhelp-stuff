@@ -10,6 +10,7 @@ p <- dat %>%
   ggplot(aes(x = date, y = value)) +
   geom_line() +
   geom_point(aes(color = weekend), size = 3) +
+  coord_cartesian(ylim=c(0, 25)) +
   scale_color_manual(values = c('black', 'gray75')) +
   facet_wrap(~ name, nrow = 2, labeller = labeller(name = c(rstudio_users = 'Number of active RStudio sessions',
                                                             slurm_active = 'Number of active Slurm nodes')),
