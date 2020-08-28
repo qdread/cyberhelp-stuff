@@ -4,3 +4,6 @@
 .Ruserdata
 
 slurm*.out
+
+# Rendered PDFs
+*.pdf
