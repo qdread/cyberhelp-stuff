@@ -1,0 +1,2 @@
+MAILTO=""
+0 7-23/2 * * * /research-home/rblake/local_disk_check.sh
