@@ -7,3 +7,6 @@ slurm*.out
 
 # Rendered PDFs
 *.pdf
+
+# Rendered HTML notebooks
+*.html

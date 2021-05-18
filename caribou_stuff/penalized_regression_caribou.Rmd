@@ -1,0 +1,151 @@
+---
+title: "Penalized regression example"
+author: "Quentin D. Read"
+date: "5/17/2021"
+output: html_document
+---
+
+**Note: after I did all this I realized I didn't include the random effects you had in your model. I think it's still possible but it complicates things slightly. We can discuss tomorrow.**
+
+# Problem
+
+This document is based on some discussion we had about whether it's a good idea to do a "data dredging" style of model selection when fitting a multiple regression model on a dataset with a relatively large number of predictors. I advocated a penalized regression approach such as lasso regression.
+
+The concern that Elie raised was that there are certain model fitting parameters that are used in penalized regression that determine the outcome. However in my opinion this isn't fundamentally different than using something like $\Delta AIC > 2$ in the dredging approach. That is a "decision rule" similar to $p < 0.05$. Therefore as long as we are explicit about the way that the model selection parameters are specified, we are being honest and so I think reviewers will not have a problem with the analysis being presented in this way.
+
+The idea of using penalized regression is that it has both cross-validation and variable selection built in to one procedure. We can select the best predictors and at the same time apply "shrinkage" to the coefficients so that they become a little bit lower than they would be if you were just using the least squares method. This allows us to avoid overfitting the model to our dataset. Cross-validation is done so that we can test the model out on data that wasn't used to fit the model, without having to permanently set aside some data as training data.
+
+Here I use Oph&eacute;lie's dataset, using just one of the herds as an example, to show how you can do this using the `caret` and `glmnet` packages in R. There are two model tuning parameters, $\alpha$ and $\lambda$. The first one, $\alpha$, varies between 0 and 1 where 0 is ridge regression and 1 is lasso regression. Ridge regression can shrink some of the coefficients for non-useful predictors very low, but they never go to exactly zero. In lasso regression, some of the coefficients can become zero. The second one, $\lambda$, can take any value. The higher the lambda, the greater penalty is imposed on predictors. So we get a more "aggressive" model selection with higher lambda values. If we didn't use cross-validation we would always get a lower error with lower lambda but if we do use cross-validation we can see that if lambda is too low, you have an overfit model because you have too many predictors. If it is too high, you don't have enough explanatory power from the predictors. There is a "sweet spot" where a certain value of lambda minimizes the cross-validation error. We are going to sample many different $\lambda$ values and find the best one.
+
+I am just going to use $\alpha = 1$ and just do lasso regression. The more general case would be "elastic net" regression which can sample $\alpha$ values between 0 and 1 but I think in this case we can just set $\alpha = 1$.
+
+# Fitting the regression model
+
+## Setup data
+
+I just loaded the pre-made dataframe that is included in the parturitions package.
+
+```{r load, message = FALSE, warning = FALSE}
+load('~/temp/finalDF.rda')
+
+library(caret)
+library(glmnet)
+library(dplyr)
+library(stringr)
+
+df2 = finalDF
+```
+
+Use Oph&eacute;lie's code to process the data into the form needed for model fitting. I just used the Western Arctic herd for this example but later you could write a function to do this for all herds.
+
+```{r create df}
+xvars <- c('tmean_insect' , 'prcp_insect' , 'windspeed_insect' ,
+  'ndays.hightemp_insect' , 'ndays.lowwind_insect' ,
+  'tmean_summer' , 'prcp_summer' , 'windspeed_summer' ,
+  'tmean_fall' , 'prcp_fall' , 'windspeed_fall' ,
+  'tmean_winter' , 'prcp_winter' , 'windspeed_winter' ,
+  'tmean_spring' , 'prcp_spring' , 'windspeed_spring' ,
+  'tmean_migration' , 'prcp_migration' , 'windspeed_migration')
+
+colnames(df2)[which(colnames(df2) %in% colnames(df2 %>% dplyr::select(ends_with('early summer'))))] <-
+  str_replace(colnames(df2 %>% dplyr::select(ends_with('early summer'))),'early summer','insect')
+colnames(df2)[which(colnames(df2) %in% colnames(df2 %>% dplyr::select(ends_with('late summer'))))] <-
+  str_replace(colnames(df2 %>% dplyr::select(ends_with('late summer'))),'late summer','summer')
+#colnames(df2)
+df2 <- df2 %>% dplyr::select(!starts_with('tmax') &! starts_with('tmin'))
+getDev <- function(x) x - median(x, na.rm = TRUE)
+df2 <- df2 %>% group_by(herd) %>% mutate(calving.deviation = getDev(calving.day))
+getScaleDF <- function(df, myherd){
+  newdf <- droplevels(na.omit(subset(df, herd == myherd)))
+  scaled.covars <- as.data.frame(scale(newdf[,c(15:34)]))
+  newdf <- droplevels(na.omit(cbind(newdf[,c('ID_Year','ID','herd','Year', 'calving.day', 'calving.deviation')], scaled.covars)))
+  return(newdf)
+}
+
+df.scaled <- getScaleDF(df2, myherd = 'Western Arctic') # For testing
+```
+
+## Fit the model
+
+Specify a range of 100 `lambda` values evenly spaced on a log scale.
+
+```{r lambdas}
+lambdas <- exp(seq(log(0.001), log(1), length.out = 100))
+```
+
+
+We use the `train()` function from the `caret` package. I use the model formula with all 20 predictors specified above in `xvars` as the initial full model. We have 10 folds for the cross-validation. The parameter `alpha` is set to always be `1` for lasso regression. The 10-fold cross-validation is done for each of the 100 lambda values, then the whole CV procedure is itself repeated 10 times (you could increase this number because it only takes a couple of seconds to run 10 repeats).
+
+```{r fit and cv}
+set.seed(7777)
+model <- train(
+  calving.day ~ ., data = df.scaled[, c('calving.day', xvars)], method = "glmnet",
+  trControl = trainControl("repeatedcv", number = 10, repeats = 10),
+  tuneGrid = expand.grid(alpha = 1, lambda = lambdas)
+)
+```
+
+We can extract a lot of information from this object. The best value of the regularization parameter `lambda` is the one that minimizes the cross-validation error across the 10 folds of the CV and across the 10 repeats of the CV procedure. When using that value of `lambda`, we have six nonzero coefficient estimates out of the 20 predictors.
+
+```{r output}
+# Best tuning parameter
+model$bestTune
+
+# Coefficients of best model
+coef(model$finalModel, model$bestTune$lambda)
+```
+
+You can see that the cross-validation error (RMSE) starts to go down as `lambda` increases (if it's too low the model is overfit), reaches a minimum at 0.27, then goes up again (if it's too high the model does not have any explanatory power).
+
+```{r plot}
+plot(model)
+```
+
+# Comparison with answer given by dredging/stepwise approaches
+
+It would be silly of me to try to convince you to change your methodology without comparing the result we get with the result of the data dredging approach and stepwise model selection, both of which are related approaches based on AIC. I will only do the dredging up to 6 predictors because it is so computationally expensive to do the full dredging ... that was the original reason why this discussion started!
+
+We are using the `caret` package to do the stepwise regression as well.
+
+```{r, message = FALSE, results = 'hide'}
+library(MuMIn)
+
+# Stepwise
+modelstep <- train(
+  calving.day ~ ., data = df.scaled[, c('calving.day', xvars)], method = "lmStepAIC"
+)
+
+
+# Dredge
+full_formula <- formula(paste("calving.day ~", paste(xvars, collapse = "+")))
+dredge_max6 <- dredge(lm(full_formula, data = df.scaled, na.action = 'na.pass'), m.lim = c(0, 6))
+dredge_best <- subset(dredge_max6, delta < 2)
+
+dredge_avg <- model.avg(dredge_best)
+```
+
+Compare coefficients. The final model from the stepwise selection has fewer coefficients than the lasso model but they are larger (because there is no regularization to shrink the coefficients).
+
+```{r}
+summary(modelstep$finalModel)
+```
+The model-averaged result of dredging has more nonzero coefficients.
+
+```{r}
+summary(dredge_avg)
+```
+
+At some point I will add cross-validation of the stepwise and model-averaged models if there's interest.
+
+# Additional reading
+
+- [stackexchange post on automated model selection & alternatives](https://stats.stackexchange.com/questions/20836/algorithms-for-automatic-model-selection/20856)
+- [stackexchange post on CV with caret and glmnet](https://stats.stackexchange.com/questions/299653/caret-glmnet-vs-cv-glmnet)
+- [model selection part of tutorial on caret](http://topepo.github.io/caret/feature-selection-overview.html)
+- [tutorial on penalized regression in R](http://www.sthda.com/english/articles/37-model-selection-essentials-in-r/153-penalized-regression-essentials-ridge-lasso-elastic-net/) - I got some of the code I used here from this
+- [another tutorial on machine learning in R](http://wavedatalab.github.io/machinelearningwithr/post4.html)
+- [interesting discussion on AIC model selection in ecology](https://dynamicecology.wordpress.com/2015/05/21/why-aic-appeals-to-ecologists-lowest-instincts/)
+
+# Concluding thought
+
+I think the ultimate issue is that regardless of whether we use the dredging approach or the cross-validated glmnet approach, they are both "automatic" and magically give us an answer without having to think that much about causality or explicitly formulate hypotheses. If this were the main focus of a MS I would probably consider fitting a smaller set of candidate models instead of taking this automatic approach, but I understand that this isn't necessarily an analysis that you all need to devote a ton of time and thought to. So that's more of a point for future analyses.
