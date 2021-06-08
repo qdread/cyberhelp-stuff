@@ -1,0 +1,147 @@
+---
+title: "Parallelizing a for loop"
+author: "Quentin D. Read"
+date: "6/8/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+The for loop is a serial construction, running one iteration at a time. We are going to do the following:
+
+- Convert the for loop to an `apply` statement, which is parallelizable.
+- Use the `future.apply` package to parallelize the loop.
+- Run that script on the Slurm cluster.
+
+This is just an example with a little code snippet. I was inspired by 
+[this post on parallelization](https://www.jottr.org/2019/01/11/parallelize-a-for-loop-by-rewriting-it-as-an-lapply-call/)
+written by the person who developed the `future` family of R packages for parallelization.
+
+## Serial version with for-loop
+
+This is the piece of code that Ryan said was the bottleneck in his script. There are three nested for-loops. Looking at the code I think there
+are actually multiple ways to optimize. But here we will just focus on turning the outermost for-loop that increments the value of `k` into an `apply` statment.
+
+```{r}
+#iterates through 1 to 120 days of antecedent rainfall 
+chirpy6<-numeric()
+for(k in 1:102752){
+  dates<-ndvi8[k,]
+  rm(chirpy5)
+  chirpy5<-numeric()
+  for(j in 1:120){
+    rm(chirpy4)
+    chirpy4<-numeric()
+    for(i in dates){
+      h<-vals[i,1]
+      chirpy1 <- chirpy[k,]
+      chirpy2<-chirpy1[(h-j):h]
+      chirpy3<-sum(chirpy2)
+      chirpy4<-c(chirpy4,chirpy3)
+    }
+    chirpy5<-c(chirpy5,chirpy4)
+  }
+  chirpy6<-rbind(chirpy6,chirpy5)
+}
+```
+
+## STEP 1. Convert the for-loop to an apply statement.
+
+The `apply` family of functions in R applies a function iteratively, just like a for loop. For example `apply()` applies to each row or column of a matrix, and `lapply()` applies to each element of a list. Here we are going to convert the for-loop to an `lapply()` statment. Basically this
+will not change anything in how the code is executed yet. It still loops through one at a time, there's no parallelization. But this is a necessary intermediate step because the parallel packages require you to set up the code as a `lapply()` style statement. 
+
+Here is the new code.
+
+```{r}
+#iterates through 1 to 120 days of antecedent rainfall 
+chirpy6 <- lapply(1:102752, function(k) {
+  dates<-ndvi8[k,]
+
+  chirpy5<-numeric(120)
+  
+  for(j in 1:120){
+
+    chirpy4<-numeric(length(dates))
+	
+    for(i in dates){
+      h<-vals[i,1]
+      chirpy1 <- chirpy[k,]
+      chirpy2<-chirpy1[(h-j):h]
+      chirpy3<-sum(chirpy2)
+      chirpy4[i]<-chirpy3
+    }
+    chirpy5[j] <- chirpy4
+  }
+  chirpy5
+})
+
+# Combine list into a matrix by rbinding all elements of the list by row.
+chirpy6 <- do.call(rbind, chirpy6)
+
+```
+
+Note that I also took the liberty of initializing the empty data structures `chirpy4` and `chirpy5` with the correct length ahead of time. This saves memory.
+Also note there is an additional step at the end because `chirpy6` is a list that we call `rbind` on all elements of to make into a matrix.
+
+## STEP 2. Parallelize the apply statement
+
+We have already done the hard work of making the for-loop into an apply statement. So after we load the `future.apply` library and initialize the cores, all we do is change `lapply()` to `future_lapply()`.
+
+Here is what the code looks like now:
+
+```{r}
+library(future.apply)
+availableCores() # The result of this line will be different depending on where it's run.
+plan(multicore(workers = 8))
+
+#iterates through 1 to 120 days of antecedent rainfall 
+chirpy6 <- future_lapply(1:102752, function(k) {
+  dates<-ndvi8[k,]
+
+  chirpy5<-numeric(120)
+  
+  for(j in 1:120){
+
+    chirpy4<-numeric(length(dates))
+	
+    for(i in dates){
+      h<-vals[i,1]
+      chirpy1 <- chirpy[k,]
+      chirpy2<-chirpy1[(h-j):h]
+      chirpy3<-sum(chirpy2)
+      chirpy4[i]<-chirpy3
+    }
+    chirpy5[j] <- chirpy4
+  }
+  chirpy5
+})
+
+# Combine list into a matrix by rbinding all elements of the list by row.
+chirpy6 <- do.call(rbind, chirpy6)
+```
+
+You do not really need to call `availableCores()` but I did just to show that if you run that line on the RStudio server it will say 16 but if you run on a single Slurm node it will say 8. It's not appropriate to use all 16 cores of the RStudio server because many users are sharing them. But we will get to run 8 iterations of the loop at once if we send the job to Slurm. Bringing me to the next step ...
+
+## STEP 3. Send to Slurm
+
+Because your script is long and complex with many places where parallelization occurs, I think it is less work to
+use the Slurm cluster "manually" rather than using the rslurm package. So that means we need to write a submission
+script which will look like this:
+
+```{bash, eval = FALSE}
+#!/bin/bash
+#SBATCH job-name=segmentedanalysis
+#SBATCH --nodes=1
+#SBATCH --ntasks=8
+
+Rscript --vanilla /research-home/runks/blah/blahblah.R
+```
+
+Where `blah/blahblah.R` is the location of your R script.
+
+Save the submit script as a text file, for example to `/research-home/runks/submitseganalysis.sh`. Then open a terminal window in your home directory and run `sbatch submitseganalysis.sh`. This will run the script. The `writeRaster()` commands in your script will write the output at the end then the
+job will terminate. A logfile will write to the same directory that you send your submit script from.
+
+Many other options can be set for the job but we will not really need to go into them here. We will go over all of this in the meeting!
