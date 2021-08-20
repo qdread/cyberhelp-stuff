@@ -27,7 +27,7 @@ df2 <- df2 %>% group_by(herd) %>% mutate(calving.deviation = getDev(calving.day)
 getScaleDF <- function(df, myherd){
   newdf <- droplevels(na.omit(subset(df, herd == myherd)))
   scaled.covars <- as.data.frame(scale(newdf[,c(15:34)]))
-  newdf <- droplevels(na.omit(cbind(newdf[,c('ID_Year','ID','herd','Year', 'calving.day', 'calving.deviation')], scaled.covars)))
+  newdf <- droplevels(na.omit(cbind(as.data.frame(newdf[,c('ID_Year','ID','herd','Year', 'calving.day', 'calving.deviation')]), scaled.covars)))
   return(newdf)
 }
 
