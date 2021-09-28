@@ -1,0 +1,51 @@
+---
+title: "NetCDF subsetting"
+author: "Quentin Read"
+date: "9/28/2021"
+output: html_document
+---
+
+First, do a query to get the latitude and longitude values for each cell. We get a matrix for each one in the `stars` object. The first one is latitude and the second longitude.
+
+```{r get latlon}
+library(stars)
+library(glue)
+
+baseurl <- 'http://thredds.aoos.org/thredds/dodsC/GOA_RUNOFF_DISCHARGE.ncml'
+
+query_latlon <- glue('{baseurl}?lat,lon')
+
+# QUery a matrix of lat and long values for all cells in the netcdf
+query_latlon <- 'http://thredds.aoos.org/thredds/dodsC/GOA_RUNOFF_DISCHARGE.ncml?lat[0:1:899][0:1:1809],lon[0:1:899][0:1:1809]'
+latlon <- read_ncdf(query_latlon)
+```
+
+Next, we want to translate Rachael's desired extent into cell indexes so we can do a reduced query for just the cells we need. The first step is to get vectors of lats and longs.
+
+```{r lat lon vectors}
+limits <- c(-151.40, 59.44, -151.63, 59.54)
+lat_vec <- as.numeric(latlon[[1]][1,])
+lon_vec <- as.numeric(latlon[[2]][,1])
+```
+
+Now find the range of indexes for the desired extent. We have to subtract one because the netCDF is indexed 0-based, and R is 1-based.
+
+```{r index ranges}
+lat_limits <- range(which(lat_vec >= limits[2] & lat_vec <= limits[4])) - 1
+lon_limits <- range(which(lon_vec >= limits[3] & lon_vec <= limits[1])) - 1
+
+lat_limits
+
+lon_limits
+```
+
+For the final query, the dimensions of `q` are ordered `(time, y, x)`. If `y` is latitude and `x` is longitude this should be correct but please check this!
+
+```{r final query}
+query_final <- glue('{baseurl}?q[0:1:12784][{lat_limits[1]}:1:{lat_limits[2]}][{lon_limits[1]}:1:{lon_limits[2]}]')
+dat <- read_ncdf(query_final)
+
+dim(dat[['q']]) 
+```
+
+Dimensions check out!
